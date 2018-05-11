@@ -2051,7 +2051,8 @@ demangle_template_value_parm (struct work_stuff *work, const char **mangled,
       else
 	{
 	  int symbol_len  = consume_count (mangled);
-	  if (symbol_len == -1)
+	  if (symbol_len == -1 
+	      || symbol_len > (long) strlen (*mangled))
 	    return -1;
 	  if (symbol_len == 0)
 	    string_appendn (s, "0", 1);
@@ -3611,7 +3612,7 @@ do_type (struct work_stuff *work, const char **mangled, string *result)
 	/* A back reference to a previously seen type */
 	case 'T':
 	  (*mangled)++;
-	  if (!get_count (mangled, &n) || n >= work -> ntypes)
+	  if (!get_count (mangled, &n) || n < 0 || n >= work -> ntypes)
 	    {
 	      success = 0;
 	    }
@@ -3789,7 +3790,7 @@ do_type (struct work_stuff *work, const char **mangled, string *result)
     /* A back reference to a previously seen squangled type */
     case 'B':
       (*mangled)++;
-      if (!get_count (mangled, &n) || n >= work -> numb)
+      if (!get_count (mangled, &n) || n < 0 || n >= work -> numb)
 	success = 0;
       else
 	string_append (result, work->btypevec[n]);
@@ -4130,7 +4131,8 @@ do_hpacc_template_literal (struct work_stuff *work, const char **mangled,
 
   literal_len = consume_count (mangled);
 
-  if (literal_len <= 0)
+  if (literal_len <= 0
+      || literal_len > (long) strlen (*mangled))
     return 0;
 
   /* Literal parameters are names of arrays, functions, etc.  and the
